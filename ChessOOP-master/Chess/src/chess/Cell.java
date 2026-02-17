@@ -20,7 +20,6 @@ public class Cell extends JPanel implements Cloneable{
 	int x,y;                             //is public because this is to be accessed by all the other class
 	private boolean isSelected=false;
 	private boolean ischeck=false;
-	private boolean ischeckmate=false;
 	
 	//Constructors
 	public Cell(int x,int y,Piece p)
