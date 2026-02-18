@@ -15,13 +15,21 @@ public class ChessUI {
         System.out.println("Welcome to Chess!");
         while (true) {
             printBoard();
-            System.out.println("Type 'reset' to reroll setup, or 'quit' to exit.");
+            System.out.println("Type 'reset' to reroll setup, 'quit' to exit, or move like 'e2 e4'.");
             System.out.print("> ");
             String cmd = scanner.nextLine().trim().toLowerCase();
             if (cmd.equals("quit")) break;
             if (cmd.equals("reset")) {
                 game.setupBoard();
                 System.out.println("Board reset.");
+                continue;
+            }
+            String[] parts = cmd.split(" ");
+            if (parts.length == 2) {
+                boolean moved = game.movePiece(parts[0], parts[1]);
+                if (!moved) {
+                    System.out.println("Invalid move. Try again.");
+                }
             }
         }
     }

@@ -7,8 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class ChessGame {
-	private String[][] board;
+public class ChessGame {	
+    private String[][] board;
 	private boolean isChess960;
 
 	public ChessGame(boolean isChess960) {
@@ -65,6 +65,35 @@ public class ChessGame {
 
 		return rank;
 	}
+
+    // Move pieces
+
+    public boolean movePiece(String from, String to)
+    {
+        int[] startPos = parseSquare(from);
+        int[] endPos = parseSquare(to);
+
+        if (startPos == null || endPos == null) return false;
+
+        String piece = board[startPos[0]][startPos[1]];
+        if (piece == null) return false;
+
+        board[endPos[0]][endPos[1]] = piece;
+        board[startPos[0]][startPos[1]] = null;
+        return true;
+    }
+
+    private int[] parseSquare(String sq)
+    {
+        if (sq.length() != 2) return null;
+
+        char file = sq.charAt(0);
+        char rank = sq.charAt(1);
+        int col = file - 'a';
+        int row = 8 - (rank - '0');
+        if (col < 0 || col > 7 || row < 0 || row > 7) return null;
+        return new int[]{row, col};
+    }
 
 	public String[][] getBoard() {
 		return board;
