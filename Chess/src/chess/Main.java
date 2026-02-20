@@ -64,6 +64,9 @@ public class Main extends JFrame implements MouseListener
 	private JComboBox<String> wcombo,bcombo;
 	private String wname=null,bname=null,winner=null;
 	static String move;
+	public static boolean chess960Mode = false;
+	private static pieces.Piece[] wBackRankPieces = new pieces.Piece[8];
+	private static pieces.Piece[] bBackRankPieces = new pieces.Piece[8];
 	private Player tempPlayer;
 	private JScrollPane wscroll,bscroll;
 	private String[] WNames={},BNames={};
@@ -72,24 +75,61 @@ public class Main extends JFrame implements MouseListener
 	private Button start,wselect,bselect,WNewPlayer,BNewPlayer;
 	public static int timeRemaining=60;
 	public static void main(String[] args){
-	
-	//variable initialization
-	wr01=new Rook("WR01","White_Rook.png",0);
-	wr02=new Rook("WR02","White_Rook.png",0);
-	br01=new Rook("BR01","Black_Rook.png",1);
-	br02=new Rook("BR02","Black_Rook.png",1);
-	wk01=new Knight("WK01","White_Knight.png",0);
-	wk02=new Knight("WK02","White_Knight.png",0);
-	bk01=new Knight("BK01","Black_Knight.png",1);
-	bk02=new Knight("BK02","Black_Knight.png",1);
-	wb01=new Bishop("WB01","White_Bishop.png",0);
-	wb02=new Bishop("WB02","White_Bishop.png",0);
-	bb01=new Bishop("BB01","Black_Bishop.png",1);
-	bb02=new Bishop("BB02","Black_Bishop.png",1);
-	wq=new Queen("WQ","White_Queen.png",0);
-	bq=new Queen("BQ","Black_Queen.png",1);
-	wk=new King("WK","White_King.png",0,7,3);
-	bk=new King("BK","Black_King.png",1,0,3);
+
+	//Use ChessGame to determine back rank order (supports both traditional and Chess960)
+	ChessGame setupGame = new ChessGame(chess960Mode);
+	String[][] setupBoard = setupGame.getBoard();
+	wBackRankPieces = new pieces.Piece[8];
+	bBackRankPieces = new pieces.Piece[8];
+	int rCount = 1, nCount = 1, bCount = 1;
+	for (int j = 0; j < 8; j++) {
+		String type = setupBoard[7][j].substring(1);
+		switch (type) {
+			case "R":
+				if (rCount == 1) {
+					wr01 = new Rook("WR01","White_Rook.png",0);
+					br01 = new Rook("BR01","Black_Rook.png",1);
+					wBackRankPieces[j] = wr01; bBackRankPieces[j] = br01;
+				} else {
+					wr02 = new Rook("WR02","White_Rook.png",0);
+					br02 = new Rook("BR02","Black_Rook.png",1);
+					wBackRankPieces[j] = wr02; bBackRankPieces[j] = br02;
+				}
+				rCount++; break;
+			case "N":
+				if (nCount == 1) {
+					wk01 = new Knight("WK01","White_Knight.png",0);
+					bk01 = new Knight("BK01","Black_Knight.png",1);
+					wBackRankPieces[j] = wk01; bBackRankPieces[j] = bk01;
+				} else {
+					wk02 = new Knight("WK02","White_Knight.png",0);
+					bk02 = new Knight("BK02","Black_Knight.png",1);
+					wBackRankPieces[j] = wk02; bBackRankPieces[j] = bk02;
+				}
+				nCount++; break;
+			case "B":
+				if (bCount == 1) {
+					wb01 = new Bishop("WB01","White_Bishop.png",0);
+					bb01 = new Bishop("BB01","Black_Bishop.png",1);
+					wBackRankPieces[j] = wb01; bBackRankPieces[j] = bb01;
+				} else {
+					wb02 = new Bishop("WB02","White_Bishop.png",0);
+					bb02 = new Bishop("BB02","Black_Bishop.png",1);
+					wBackRankPieces[j] = wb02; bBackRankPieces[j] = bb02;
+				}
+				bCount++; break;
+			case "Q":
+				wq = new Queen("WQ","White_Queen.png",0);
+				bq = new Queen("BQ","Black_Queen.png",1);
+				wBackRankPieces[j] = wq; bBackRankPieces[j] = bq;
+				break;
+			case "K":
+				wk = new King("WK","White_King.png",0,7,j);
+				bk = new King("BK","Black_King.png",1,0,j);
+				wBackRankPieces[j] = wk; bBackRankPieces[j] = bk;
+				break;
+		}
+	}
 	wp=new Pawn[8];
 	bp=new Pawn[8];
 	for(int i=0;i<8;i++)
@@ -97,10 +137,10 @@ public class Main extends JFrame implements MouseListener
 		wp[i]=new Pawn("WP0"+(i+1),"White_Pawn.png",0);
 		bp[i]=new Pawn("BP0"+(i+1),"Black_Pawn.png",1);
 	}
-	
+
 	//Setting up the board
 	Mainboard = new Main();
-	Mainboard.setVisible(true);	
+	Mainboard.setVisible(true);
 	Mainboard.setResizable(false);
 	}
 	
@@ -208,44 +248,12 @@ public class Main extends JFrame implements MouseListener
 		boardState=new Cell[8][8];
 		for(int i=0;i<8;i++)
 			for(int j=0;j<8;j++)
-			{	
+			{
 				P=null;
-				if(i==0&&j==0)
-					P=br01;
-				else if(i==0&&j==7)
-					P=br02;
-				else if(i==7&&j==0)
-					P=wr01;
-				else if(i==7&&j==7)
-					P=wr02;
-				else if(i==0&&j==1)
-					P=bk01;
-				else if (i==0&&j==6)
-					P=bk02;
-				else if(i==7&&j==1)
-					P=wk01;
-				else if (i==7&&j==6)
-					P=wk02;
-				else if(i==0&&j==2)
-					P=bb01;
-				else if (i==0&&j==5)
-					P=bb02;
-				else if(i==7&&j==2)
-					P=wb01;
-				else if(i==7&&j==5)
-					P=wb02;
-				else if(i==0&&j==3)
-					P=bk;
-				else if(i==0&&j==4)
-					P=bq;
-				else if(i==7&&j==3)
-					P=wk;
-				else if(i==7&&j==4)
-					P=wq;
-				else if(i==1)
-				P=bp[j];
-				else if(i==6)
-					P=wp[j];
+				if(i==0) P=bBackRankPieces[j];
+				else if(i==7) P=wBackRankPieces[j];
+				else if(i==1) P=bp[j];
+				else if(i==6) P=wp[j];
 				cell=new Cell(i,j,P);
 				cell.addMouseListener(this);
 				board.add(cell);
@@ -500,9 +508,7 @@ public class Main extends JFrame implements MouseListener
 		end=true;
 		Mainboard.disable();
 		Mainboard.dispose();
-		Mainboard = new Main();
-		Mainboard.setVisible(true);
-		Mainboard.setResizable(false);
+		Main.main(new String[0]);
     }
     
     //These are the abstract function of the parent class. Only relevant method here is the On-Click Fuction
